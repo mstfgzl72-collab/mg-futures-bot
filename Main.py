@@ -14,8 +14,8 @@ API_SECRET = "2Orsd03tgpUKTZRmdmbCZBXyQS0QnN15dpXRuZErFdJKuLicrOlT3BcywaMYlcVb"
 TELEGRAM_TOKEN = "8142272590:AAHIDqXDABVz01DkqGhCns7NSN8axWNfFAQ"
 TELEGRAM_CHAT_ID = "7259012643"
 
-LEVERAGE = 5          # Kaldıraç
-ORDER_USDT = 10       # İşlem büyüklüğü (USDT)
+LEVERAGE = 20          # Kaldıraç
+ORDER_USDT = 20       # İşlem büyüklüğü (USDT)
 
 # Binance Futures bağlantısı
 exchange = ccxt.binance({
