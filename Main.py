@@ -2,20 +2,21 @@ from flask import Flask, request
 import ccxt
 import json
 import requests
+import os
 
 app = Flask(__name__)
 
 # ==========================
-#  AYARLAR
+#  ORTAM DEĞİŞKENLERİ (ENV)
 # ==========================
-API_KEY = "z2QEQ6a3jPCdOhAjfGmn2HR4GbPpruDoVubKoZfJYtw94rw0GpVZAkL5Uvhe37RX"
-API_SECRET = "2Orsd03tgpUKTZRmdmbCZBXyQS0QnN15dpXRuZErFdJKuLicrOlT3BcywaMYlcVb"
+API_KEY = os.getenv("API_KEY")
+API_SECRET = os.getenv("API_SECRET")
 
-TELEGRAM_TOKEN = "8142272590:AAHIDqXDABVz01DkqGhCns7NSN8axWNfFAQ"
-TELEGRAM_CHAT_ID = "7259012643"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-LEVERAGE = 20          # Kaldıraç
-ORDER_USDT = 20       # İşlem büyüklüğü (USDT)
+LEVERAGE = int(os.getenv("LEVERAGE", 20))
+ORDER_USDT = float(os.getenv("ORDER_USDT", 20))
 
 # Binance Futures bağlantısı
 exchange = ccxt.binance({
@@ -82,7 +83,7 @@ def get_open_position(symbol):
 def close_position(symbol):
     direction, amount = get_open_position(symbol)
     if direction is None or amount == 0:
-        return None  # Kapalı zaten
+        return None
 
     close_side = "sell" if direction == "BUY" else "buy"
 
@@ -93,11 +94,11 @@ def close_position(symbol):
         amount=amount
     )
 
-    price = order["average"] or order["price"]
     balance = exchange.fetch_balance()["total"]["USDT"]
+    price = order["average"] or order["price"]
 
     send_telegram(
-        f"📉 *Pozisyon Kapatıldı*\n"
+        f"📉 POZİSYON KAPATILDI\n"
         f"Parite: {symbol}\n"
         f"Kapanış Fiyatı: {price}\n"
         f"Kalan Bakiye: {balance} USDT"
@@ -124,9 +125,9 @@ def open_position(symbol, side):
     price = order["average"] or order["price"]
 
     send_telegram(
-        f"🚀 *Yeni Pozisyon Açıldı*\n"
+        f"🚀 YENİ POZİSYON AÇILDI\n"
         f"Parite: {symbol}\n"
-        f"Yön: {side.upper()}\n"
+        f"Yön: {side}\n"
         f"Kaldıraç: {LEVERAGE}x\n"
         f"USDT: {ORDER_USDT}\n"
         f"Adet: {qty}\n"
@@ -148,26 +149,23 @@ def webhook():
 
     current_pos, _ = get_open_position(symbol)
 
-    # ========== 1) CLOSE işlemi ==========
     if action == "CLOSE":
         close_position(symbol)
         return {"success": True}, 200
 
-    # ========== 2) BUY sinyali ==========
     if action == "BUY":
         if current_pos == "SELL":
             close_position(symbol)
-        open_position(symbol, "buy")
+        open_position(symbol, "BUY")
         return {"success": True}, 200
 
-    # ========== 3) SELL sinyali ==========
     if action == "SELL":
         if current_pos == "BUY":
             close_position(symbol)
-        open_position(symbol, "sell")
+        open_position(symbol, "SELL")
         return {"success": True}, 200
 
-    return {"error": "Geçersiz action"}, 400
+    return {"error": "Invalid action"}, 400
 
 
 # ==========================
