@@ -65,7 +65,8 @@ def usdt_to_qty(symbol, usdt):
 # ==========================
 def get_open_position(symbol):
     symbol_f = symbol.replace("/", "")
-    positions = exchange.fapiPrivate_get_positionrisk()
+    positions = exchange.fapiPrivate_get_positionRisk()
+
 
     for pos in positions:
         if pos["symbol"] == symbol_f:
