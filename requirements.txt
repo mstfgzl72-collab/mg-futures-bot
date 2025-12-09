@@ -3,3 +3,4 @@ gunicorn==23.0.0
 binance-connector==3.8.0
 python-dotenv==1.0.1
 requests==2.32.3
+ccxt==4.2.98
